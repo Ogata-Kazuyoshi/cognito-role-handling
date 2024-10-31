@@ -52,14 +52,7 @@ class CustomOAuth2SuccessHandler(
             else -> {
                 val sub = principal.getAttribute<String>("sub")
                     ?: throw Exception("!!! keycloak sub is not found. !!!")
-                val companyUUID = principal.getAttribute<String>("custom:companyUUID")
-                    ?: throw Exception("!!! custom:companyUUID is not found. !!!")
-                val groups = principal.getAttribute<List<String>>("cognito:groups")
-                    ?: throw Exception("!!! cognito:groups is not found. !!!")
-                val domain = principal.getAttribute<String>("custom:allowDomain")
-                    ?: throw Exception("!!! cognito:groups is not found. !!!")
-                val role = Role.valueOf(groups[0])
-                AuthAttributes(sub, companyUUID, role, domain)
+                AuthAttributes(sub, "", Role.EMPLOYEE, "")
             }
         }
 
