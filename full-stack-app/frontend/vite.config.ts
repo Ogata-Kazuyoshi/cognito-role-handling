@@ -17,9 +17,11 @@ export default defineConfig({
         hmr: {
           overlay: false
         },
+        port: 5180,
         proxy: {
-          '/api': 'http://localhost:8080/',
+          '/api': 'http://localhost:8082/',
         },
       },
+
   plugins: [react()],
 })
