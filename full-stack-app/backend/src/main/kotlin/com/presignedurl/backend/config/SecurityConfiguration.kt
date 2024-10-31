@@ -1,5 +1,6 @@
 package com.presignedurl.backend.config
 
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.disable
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -17,15 +18,14 @@ class SecurityConfiguration(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf().disable()
+            .csrf { disable() }
             .authorizeHttpRequests {
                 it.requestMatchers("/api/**")
-                    .authenticated()
+                    .hasRole("ADMIN")
                 it.anyRequest()
                     .permitAll()
             }
             .oauth2Login {
-                println("ここまではきてる")
                 it.successHandler(successHandler)
             }
         return http.build()
