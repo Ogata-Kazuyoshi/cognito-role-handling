@@ -63,12 +63,14 @@ iac-cognito-deploy:
 	aws cloudformation create-stack --stack-name ogata-cloudformation-cognito \
 	--template-body file://full-stack-app/cloudformation-cognito.yml \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--parameters ParameterKey=CognitoCustomDomainPrefix,ParameterValue=$(COGNITO_CUSTOMDOMAIN_PREFIX) \
 	--region ap-northeast-1
 
 iac-cognito-update:
 	aws cloudformation update-stack --stack-name ogata-cloudformation-cognito \
 	--template-body file://full-stack-app/cloudformation-cognito.yml \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--parameters ParameterKey=CognitoCustomDomainPrefix,ParameterValue=$(COGNITO_CUSTOMDOMAIN_PREFIX) \
 	--region ap-northeast-1
 
 iac-wafacl-deploy:

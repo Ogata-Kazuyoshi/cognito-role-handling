@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Cognito User Pool and Client for ogata-cognito
 
+Parameters:
+  CognitoCustomDomainPrefix:
+    Type: String
+
 Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
@@ -28,7 +32,11 @@ Resources:
           AttributeDataType: String
           Mutable: false
           Required: true
-        - Name: phone_number # 電話番号属性を追加
+        - Name: allowDomain
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+        - Name: companyUUID
           AttributeDataType: String
           Mutable: true
           Required: false
@@ -39,7 +47,7 @@ Resources:
   CognitoUserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
-      Domain: ogata-cog
+      Domain: ogata-user-domain
       UserPoolId: !Ref CognitoUserPool
 
   CognitoUserPoolClient:
@@ -53,7 +61,7 @@ Resources:
         - ALLOW_REFRESH_TOKEN_AUTH
         - ALLOW_USER_PASSWORD_AUTH
       CallbackURLs:
-        - http://localhost:8080/login/oauth2/code/cognito
+        - http://localhost:8082/login/oauth2/code/cognito
       AllowedOAuthFlows:
         - code
       AllowedOAuthScopes:
@@ -63,6 +71,24 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
       AllowedOAuthFlowsUserPoolClient: true
+
+  CognitoUserPoolGroupAdmin:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: ADMIN
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoUserPoolGroupManager:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: MANAGER
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoUserPoolGroupEmployee:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: EMPLOYEE
+      UserPoolId: !Ref CognitoUserPool
 
 Outputs:
   UserPoolId:

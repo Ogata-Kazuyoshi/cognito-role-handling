@@ -17,12 +17,9 @@ spring:
             issuer-uri: https://cognito-idp.ap-northeast-1.amazonaws.com/${COGNITO_USERPOOL_ID}
             authorization-uri: ${COGNITO_DOMAIN}/oauth2/authorize
 
+server:
+  port: 8082
+
 environments:
   after-auth-redirect-url: ${REDIRECT_PATH}
   login-error-redirect-url: ${REDIRECT_PATH}
-
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.oauth2: DEBUG
