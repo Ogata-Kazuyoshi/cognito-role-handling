@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  backendwithfrontend-cognito-role:
+    container_name: backendwithfrontend-cognito-role
+    build:
+      context: .
+      dockerfile: Dockerfile-local
+    ports:
+      - 6200:8080
+    environment:
+      - COGNITO_DOMAIN=${COGNITO_DOMAIN}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - COGNITO_USERPOOL_ID=${COGNITO_USERPOOL_ID}
+      - REDIRECT_PATH=${REDIRECT_PATH}
+    networks:
+      - cognito-role-handling
+    command: java -jar app.jar
+networks:
+  cognito-role-handling:
+    driver: bridge
+
+

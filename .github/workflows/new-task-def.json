@@ -1,0 +1,59 @@
+{
+  "family": "ogata-dummy-task-family",
+  "containerDefinitions": [
+    {
+      "name": "ogata-dummy-container",
+      "image": "temporary",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/ogata-dummy-container",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "secrets": [
+        {
+          "name": "POSTGRES_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:username::"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:password::"
+        },
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:SPRING_PROFILES_ACTIVE::"
+        },
+        {
+          "name": "CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:CLIENT_ID::"
+        },
+        {
+          "name": "CLIENT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:CLIENT_SECRET::"
+        },
+        {
+          "name": "COGNITO_DOMAIN",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:COGNITO_DOMAIN::"
+        },
+        {
+          "name": "COGNITO_USERPOOL_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:157094121738:secret:ogata-cloudformation-secret-Mm0HHw:COGNITO_USERPOOL_ID::"
+        }
+      ]
+    }
+  ],
+  "executionRoleArn": "arn:aws:iam::157094121738:role/ogata-ecs-task-execution-role",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024"
+}
