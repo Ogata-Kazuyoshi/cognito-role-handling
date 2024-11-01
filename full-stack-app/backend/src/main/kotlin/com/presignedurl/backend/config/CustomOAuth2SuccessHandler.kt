@@ -45,7 +45,7 @@ class CustomOAuth2SuccessHandler(
                 val groups = principal.getAttribute<List<String>>("cognito:groups")
                     ?: throw Exception("!!! cognito:groups is not found. !!!")
                 val domain = principal.getAttribute<String>("custom:allowDomain")
-                    ?: throw Exception("!!! cognito:groups is not found. !!!")
+                    ?: ""
                 val role = Role.valueOf(groups[0])
                 AuthAttributes(sub, companyUUID, role, domain)
             }

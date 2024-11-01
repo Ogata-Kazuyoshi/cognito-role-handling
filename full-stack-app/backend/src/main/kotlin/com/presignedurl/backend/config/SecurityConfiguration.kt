@@ -18,7 +18,7 @@ class SecurityConfiguration(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf { disable() }
+            .csrf().disable()
             .authorizeHttpRequests {
                 it.requestMatchers("/api/**")
                     .hasRole("ADMIN")

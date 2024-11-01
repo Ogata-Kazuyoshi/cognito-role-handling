@@ -25,6 +25,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.amazonaws:aws-java-sdk-s3:1.12.583")
+	implementation("software.amazon.awssdk:cognitoidentityprovider:2.20.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("io.mockk:mockk:1.13.7")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -21,3 +21,8 @@ server:
 environments:
   after-auth-redirect-url: ${REDIRECT_PATH}
   login-error-redirect-url: ${REDIRECT_PATH}
+  cognito:
+    user-pool-id: ${COGNITO_USERPOOL_ID}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    session-token: ${AWS_SESSION_TOKEN}
