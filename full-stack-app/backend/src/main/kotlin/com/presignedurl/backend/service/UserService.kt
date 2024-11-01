@@ -20,25 +20,9 @@ interface UserService {
 class DefaultUserService(
     @Value("\${environments.cognito.user-pool-id}")
     val userPoolId: String,
-    @Value("\${environments.cognito.access-key}")
-    val accessKey: String,
-    @Value("\${environments.cognito.secret-key}")
-    val secretKey: String,
-    @Value("\${environments.cognito.session-token}")
-    val sessionToken: String
+    val cognitoClient: CognitoIdentityProviderClient
 ): UserService {
     override fun createUser(email: String, companyUUID: String) {
-        this.registerUser(email, companyUUID)
-    }
-
-    private fun registerUser(email: String, companyUUID: String) {
-        val awsCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken)
-        val cognitoClient = CognitoIdentityProviderClient.builder()
-            .region(Region.AP_NORTHEAST_1)
-            .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-            .build()
-
-        // 標準属性とカスタム属性を設定
         val userAttributes = mutableListOf(
             AttributeType.builder().name("email").value(email).build(),
             AttributeType.builder().name("email_verified").value("true").build(),
@@ -59,6 +43,7 @@ class DefaultUserService(
             .username(email)
             .groupName("EMPLOYEE")
             .build()
+
 
         cognitoClient.adminAddUserToGroup(addUserToGroupRequest)
     }
