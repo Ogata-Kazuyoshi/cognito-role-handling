@@ -11,7 +11,6 @@ import { headers } from '../config/responseHeaderConfig';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        console.log('postに届いてます!');
         const body: EventBody = JSON.parse(event.body || '{}');
 
         if (!body.userEmail || typeof body.userEmail !== 'string') {
@@ -41,13 +40,10 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             DesiredDeliveryMediums: ['EMAIL'],
             ForceAliasCreation: false,
         };
-        console.log('ここまで来てる');
 
         const command = new AdminCreateUserCommand(params);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         await cognitoClient.send<AdminCreateUserCommand>(command);
-        console.log('登録もできてる');
 
         // Add user to ADMIN group
         const addToGroupParams: AdminAddUserToGroupCommandInput = {
@@ -56,10 +52,8 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             GroupName: 'ADMIN',
         };
         const addToGroupCommand = new AdminAddUserToGroupCommand(addToGroupParams);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         await cognitoClient.send<AdminAddUserToGroupCommand>(addToGroupCommand);
-        console.log('ユーザーをADMINグループに追加しました');
 
         return {
             statusCode: 200,
