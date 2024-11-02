@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cloudfront-lambda-register
+
+  Sample SAM Template for cloudfront-lambda-register
+
+Parameters:
+  UserPoolId:
+    Type: String
+  AwsAccessKeyId:
+    Type: String
+  AwsSecretAccessKey:
+    Type: String
+  AwsSessionToken:
+    Type: String
+
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 15
+    Runtime: nodejs18.x
+    MemorySize: 256
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        ResourcePolicy:
+          CustomStatements:
+            - Effect: Allow
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: execute-api:/*
+              Condition:
+                IpAddress:
+                  aws:SourceIp: '13.114.22.14/32'
+            - Effect: Deny
+              Principal: '*'
+              Action: execute-api:Invoke
+              Resource: execute-api:/*
+              Condition:
+                NotIpAddress:
+                  aws:SourceIp: '13.114.22.14/32'
+
+  UserResister:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          UserPoolId: !Ref UserPoolId
+          AwsAccessKeyId: !Ref AwsAccessKeyId
+          AwsSecretAccessKey: !Ref AwsSecretAccessKey
+          AwsSessionToken: !Ref AwsSessionToken
+      CodeUri: lambdafunction/
+      Handler: userResister.lambdaHandler
+      Architectures:
+        - x86_64
+      Role:
+        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/ogata-lambdaExecutionRole'
+      Events:
+        userResister:
+          Type: Api
+          Properties:
+            Path: /api/users
+            Method: post
+            RestApiId: !Ref ApiGatewayApi
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: 'es2020'
+        Sourcemap: true
+        EntryPoints:
+          - controller/userResister.ts

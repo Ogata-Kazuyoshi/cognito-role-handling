@@ -1,17 +1,18 @@
-import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import {
+    AdminAddUserToGroupCommand,
+    AdminAddUserToGroupCommandInput,
     AdminCreateUserCommand,
     AdminCreateUserCommandInput,
     UsernameExistsException,
 } from '@aws-sdk/client-cognito-identity-provider';
-import {PutCommand} from '@aws-sdk/lib-dynamodb';
-import {dynamo, headers} from "./dynamodbConfig";
-import {AdminCreateUserResponse, cognitoClient, EventBody, userPoolId} from "./cognitoConfig";
-
+import { cognitoClient, EventBody, userPoolId } from '../config/cognitoConfig';
+import { headers } from '../config/responseHeaderConfig';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const body: EventBody = JSON.parse(event.body || '{}') ;
+        console.log('postに届いてます!');
+        const body: EventBody = JSON.parse(event.body || '{}');
 
         if (!body.userEmail || typeof body.userEmail !== 'string') {
             throw new Error('Invalid or missing userEmail in request body');
@@ -40,27 +41,31 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             DesiredDeliveryMediums: ['EMAIL'],
             ForceAliasCreation: false,
         };
+        console.log('ここまで来てる');
 
         const command = new AdminCreateUserCommand(params);
-        const response = await cognitoClient.send<AdminCreateUserCommand>(command);
-        const userId = response as AdminCreateUserResponse;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await cognitoClient.send<AdminCreateUserCommand>(command);
+        console.log('登録もできてる');
 
-        const putItemParams = {
-            TableName: 'ogataUserTable',
-            Item: {
-                id: userId.User.Username,
-                email: userEmail,
-                date: new Date().toISOString(),
-            },
+        // Add user to ADMIN group
+        const addToGroupParams: AdminAddUserToGroupCommandInput = {
+            UserPoolId: userPoolId,
+            Username: userEmail,
+            GroupName: 'ADMIN',
         };
-        const data = await dynamo.send(new PutCommand(putItemParams));
+        const addToGroupCommand = new AdminAddUserToGroupCommand(addToGroupParams);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await cognitoClient.send<AdminAddUserToGroupCommand>(addToGroupCommand);
+        console.log('ユーザーをADMINグループに追加しました');
+
         return {
             statusCode: 200,
             headers: headers,
             body: JSON.stringify({
-                message: `ユーザー ${userEmail} を作成し、招待メールを送信しました。DynamoDBへの登録も完了です`,
-                userId: userId.User?.Username,
-                data: data,
+                message: `ユーザー ${userEmail} を作成し、招待メールを送信しました。`,
             }),
         };
     } catch (err) {
