@@ -2,16 +2,11 @@ package com.presignedurl.backend.service
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminAddUserToGroupRequest
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserResponse
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType
 
 interface UserService {
     fun createUser(email: String, companyUUID: String)
@@ -43,8 +38,6 @@ class DefaultUserService(
             .username(email)
             .groupName("EMPLOYEE")
             .build()
-
-
         cognitoClient.adminAddUserToGroup(addUserToGroupRequest)
     }
 

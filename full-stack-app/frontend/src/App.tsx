@@ -1,43 +1,29 @@
 import './App.css';
-import axios from "axios";
-import {useState} from "react";
+import {Route, Routes} from "react-router-dom";
+import {AuthProvider} from "./component/AuthProvider.tsx";
+import {Login} from "./component/Login.tsx";
+import {Application} from "./component/Application.tsx";
+import {UnAuthorized} from "./component/UnAuthorized.tsx";
+import {Authorized} from "./component/Authorized.tsx";
 
-interface Email {
-    email: string
-}
 function App() {
-    const [email, setEmail] = useState('')
-    const handleClick = async () => {
-        const res =
-            await axios.get('/api/users', )
-                .then(res => res.data)
-        console.log({res})
-    }
-
-    const handleResister = async () => {
-        const reqBody: Email = {
-            email: email
-        }
-        await axios.post('/api/users', reqBody )
-    }
 
   return (
     <>
-        <div>Cognitoのトライ</div>
-        <div>
-            <button onClick={handleClick}>User情報取得</button>
-        </div>
-        <br/>
-        <div>
-            <label>新規登録ユーザー</label>
-            <input
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <br/>
-            <button onClick={handleResister}>新規登録</button>
-        </div>
+        <Routes>
+            <Route path="/" element={<AuthProvider />}>
+                <Route path="login" element={
+                    <UnAuthorized>
+                        <Login />
+                    </UnAuthorized>
+                }/>
+                <Route path="app" element={
+                    <Authorized>
+                        <Application />
+                    </Authorized>
+                }/>
+            </Route>
+        </Routes>
     </>
   );
 }
