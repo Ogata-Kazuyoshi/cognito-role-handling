@@ -14,6 +14,7 @@ export const App = (
 
     const [email, setEmail] = useState('')
     const [allowDomain, setAllowDomain] = useState('')
+    const [userName, setUserName] = useState('')
 
     const handleClick = async () => {
         const reqBody: RequestCreateUser = {
@@ -28,6 +29,11 @@ export const App = (
         const employeeRes = await userService?.findUsersByGroup('EMPLOYEE')
         console.log({managerRes})
         console.log({employeeRes})
+    }
+
+    const handleDeleteUser = async () => {
+        const res = await userService?.deleteUserByUserName(userName)
+        console.log({res})
     }
 
   return (
@@ -50,6 +56,15 @@ export const App = (
           </div>
           <div>
               <button onClick={handleFindUser}>ユーザー情報を取得</button>
+          </div>
+          <div>
+              <label>削除したいUserName : </label>
+              <input value={userName} onChange={(e) => {
+                  setUserName(e.target.value)
+              }} type="text"/>
+          </div>
+          <div>
+              <button onClick={handleDeleteUser}>ユーザーを削除</button>
           </div>
       </>
   )

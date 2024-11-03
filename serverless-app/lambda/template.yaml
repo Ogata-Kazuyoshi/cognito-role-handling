@@ -24,7 +24,7 @@ Globals:
     MemorySize: 256
   Api:
     Cors:
-      AllowMethods: "'GET,POST'"
+      AllowMethods: "'GET,POST,DELETE'"
       AllowHeaders: "'Content-Type'"
       AllowOrigin: "'*'"
 
@@ -112,3 +112,34 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - controller/usersFindAllByGroup.ts
+
+  UserDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          UserPoolId: !Ref UserPoolId
+          AwsAccessKeyId: !Ref AwsAccessKeyId
+          AwsSecretAccessKey: !Ref AwsSecretAccessKey
+          AwsSessionToken: !Ref AwsSessionToken
+      CodeUri: lambdafunction/
+      Handler: userDelete.lambdaHandler
+      Architectures:
+        - x86_64
+      Role:
+        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/ogata-lambdaExecutionRole'
+      Events:
+        userDelete:
+          Type: Api
+          Properties:
+            Path: /api/users
+            Method: delete
+            RestApiId: !Ref ApiGatewayApi
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: 'es2020'
+        Sourcemap: true
+        EntryPoints:
+          - controller/userDelete.ts

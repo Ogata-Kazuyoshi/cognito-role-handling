@@ -2,7 +2,11 @@ import {
     AdminAddUserToGroupCommand,
     AdminAddUserToGroupCommandInput,
     AdminCreateUserCommand,
-    AdminCreateUserCommandInput, ListUsersInGroupCommand, ListUsersInGroupCommandInput, ListUsersInGroupCommandOutput
+    AdminCreateUserCommandInput,
+    AdminDeleteUserCommand,
+    AdminDeleteUserCommandInput,
+    ListUsersInGroupCommand,
+    ListUsersInGroupCommandInput
 } from "@aws-sdk/client-cognito-identity-provider";
 import {userPoolId} from "../config/cognitoConfig";
 import {DefaultUserRepository, UserRepository} from "../repository/UserRepository";
@@ -12,12 +16,12 @@ import {ResponseUser} from "../model/ResponseUser";
 export interface UserService {
     createAndAssignManager(email: string, allowDomain: string, companyUUID?: string): Promise<void>
     findUsersByGroupName(groupName: string): Promise<ResponseUser[]>
+    deleteUserByUsername(username: string): Promise<void>
 }
 
 export class DefaultUserService implements UserService {
     constructor(private userRepository: UserRepository = new DefaultUserRepository()) {
     }
-
 
     async createAndAssignManager(email: string, allowDomain: string, companyUUID?: string): Promise<void> {
         await this.createManager(email, allowDomain, companyUUID);
@@ -48,6 +52,20 @@ export class DefaultUserService implements UserService {
         } catch (error) {
             console.error("Error fetching users by group name:", error);
             throw Error()
+        }
+    }
+
+    async deleteUserByUsername(username: string): Promise<void> {
+        const params: AdminDeleteUserCommandInput = {
+            UserPoolId: userPoolId,
+            Username: username,
+        };
+        const command = new AdminDeleteUserCommand(params);
+        try {
+            await this.userRepository.deleteCognitoUser(command);
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            throw Error();
         }
     }
 
