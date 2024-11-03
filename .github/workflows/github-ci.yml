@@ -149,7 +149,8 @@ jobs:
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --parameter-overrides \
-          LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }}
+          LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }} \
+          UserPoolId=${{ vars.COGNITO_USERPOOL_ID }}
         working-directory: serverless-app/lambda
 
   build-and-deploy-cloudfront:
