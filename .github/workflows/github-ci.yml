@@ -181,7 +181,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd cloudfront
+          cd serverless-app/cloudfront
           $HOME/.bun/bin/bun i
 
       - name: Build cloudfront
