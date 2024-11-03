@@ -47,7 +47,7 @@ Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod
+      StageName: Dev
       Auth:
         ResourcePolicy:
           CustomStatements:
