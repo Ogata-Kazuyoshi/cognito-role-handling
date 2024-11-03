@@ -1,16 +1,15 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {UsernameExistsException,} from '@aws-sdk/client-cognito-identity-provider';
 import {headers} from '../config/responseHeaderConfig';
-import {RequestUserCreate} from "../model/RequestUserCreate";
+import {RequestCreateUser} from "../model/RequestCreateUser";
 import {DefaultUserService} from "../servise/UserService";
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const body: RequestUserCreate = JSON.parse(event.body || '{}');
-        const email = body.email;
+        const {email, allowDomain, companyUUID}: RequestCreateUser = JSON.parse(event.body || '{}');
 
         const userService = new DefaultUserService()
-        await userService.createAndAssignManager(email)
+        await userService.createAndAssignManager(email, allowDomain, companyUUID)
 
         return {
             statusCode: 200,

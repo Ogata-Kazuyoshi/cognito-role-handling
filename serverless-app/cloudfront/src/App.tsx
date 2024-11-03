@@ -1,58 +1,56 @@
 import {useState} from 'react'
 import './App.css'
-import axios from "axios";
+import {DefaultUserService, UserService} from "./service/UserService.ts";
+import {RequestCreateUser} from "./model/RequestCreateUser.ts";
 
-function App() {
+interface Props {
+    userService?: UserService
+}
+export const App = (
+    {
+        userService = new DefaultUserService()
+    }: Props
+) => {
 
     const [email, setEmail] = useState('')
-    const apiGateway = import.meta.env.VITE_APIGATEWAY
+    const [allowDomain, setAllowDomain] = useState('')
+
     const handleClick = async () => {
-        const res = await axios.post(`${apiGateway}/api/users`,{
-            email: email
-        })
-        console.log({res})
+        const reqBody: RequestCreateUser = {
+            email,
+            allowDomain
+        }
+        await userService.createUser(reqBody)
     }
 
-
+    const handleFindUser = async () => {
+        const managerRes = await userService.findUsersByGroup('MANAGER')
+        const employeeRes = await userService?.findUsersByGroup('EMPLOYEE')
+        console.log({managerRes})
+        console.log({employeeRes})
+    }
 
   return (
       <>
           <div>ユーザーEメール入力用</div>
-          <br/>
           <div>
               <label>user email : </label>
               <input value={email} onChange={(e) => {
                   setEmail(e.target.value)
               }} type="text"/>
+          </div>
+          <div>
+              <label>allowDomain : </label>
+              <input value={allowDomain} onChange={(e) => {
+                  setAllowDomain(e.target.value)
+              }} type="text"/>
+          </div>
+          <div>
               <button onClick={handleClick}>ユーザー登録</button>
           </div>
-          <br/>
-          <br/>
-          <br/>
-          <table >
-              <thead>
-              <tr>
-                  <th>
-                      id
-                  </th>
-                  <th>
-                      email
-                  </th>
-                  <th>
-                      date
-                  </th>
-                  <th>
-                      削除ボタン
-                  </th>
-              </tr>
-              </thead>
-              <tbody>
-
-              </tbody>
-          </table>
-
+          <div>
+              <button onClick={handleFindUser}>ユーザー情報を取得</button>
+          </div>
       </>
   )
 }
-
-export default App
