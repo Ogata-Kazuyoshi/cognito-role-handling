@@ -8,7 +8,7 @@ function App() {
     const apiGateway = import.meta.env.VITE_APIGATEWAY
     const handleClick = async () => {
         const res = await axios.post(`${apiGateway}/api/users`,{
-            userEmail: email
+            email: email
         })
         console.log({res})
     }

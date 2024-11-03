@@ -1,5 +1,4 @@
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
-// @ts-ignore
 export const cognitoClient = process.env.AWS_SAM_LOCAL
     ? new CognitoIdentityProviderClient({
           region: 'ap-northeast-1',
@@ -12,6 +11,3 @@ export const cognitoClient = process.env.AWS_SAM_LOCAL
     : new CognitoIdentityProviderClient({});
 export const userPoolId = process.env.UserPoolId;
 
-export interface EventBody {
-    userEmail: string;
-}

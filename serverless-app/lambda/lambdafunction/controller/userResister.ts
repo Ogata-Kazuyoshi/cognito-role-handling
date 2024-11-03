@@ -1,65 +1,22 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import {
-    AdminAddUserToGroupCommand,
-    AdminAddUserToGroupCommandInput,
-    AdminCreateUserCommand,
-    AdminCreateUserCommandInput,
-    UsernameExistsException,
-} from '@aws-sdk/client-cognito-identity-provider';
-import { cognitoClient, EventBody, userPoolId } from '../config/cognitoConfig';
-import { headers } from '../config/responseHeaderConfig';
+import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
+import {UsernameExistsException,} from '@aws-sdk/client-cognito-identity-provider';
+import {headers} from '../config/responseHeaderConfig';
+import {RequestUserCreate} from "../model/RequestUserCreate";
+import {DefaultUserService} from "../servise/UserService";
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const body: EventBody = JSON.parse(event.body || '{}');
+        const body: RequestUserCreate = JSON.parse(event.body || '{}');
+        const email = body.email;
 
-        if (!body.userEmail || typeof body.userEmail !== 'string') {
-            throw new Error('Invalid or missing userEmail in request body');
-        }
-        const userEmail = body.userEmail;
-
-        if (!userPoolId) {
-            throw new Error('USER_POOL_ID is not set');
-        } else {
-            console.log({ USER_POOL_ID: userPoolId });
-        }
-
-        const params: AdminCreateUserCommandInput = {
-            UserPoolId: userPoolId,
-            Username: userEmail,
-            UserAttributes: [
-                {
-                    Name: 'email',
-                    Value: userEmail,
-                },
-                {
-                    Name: 'email_verified',
-                    Value: 'true',
-                },
-            ],
-            DesiredDeliveryMediums: ['EMAIL'],
-            ForceAliasCreation: false,
-        };
-
-        const command = new AdminCreateUserCommand(params);
-        // @ts-ignore
-        await cognitoClient.send<AdminCreateUserCommand>(command);
-
-        // Add user to ADMIN group
-        const addToGroupParams: AdminAddUserToGroupCommandInput = {
-            UserPoolId: userPoolId,
-            Username: userEmail,
-            GroupName: 'ADMIN',
-        };
-        const addToGroupCommand = new AdminAddUserToGroupCommand(addToGroupParams);
-        // @ts-ignore
-        await cognitoClient.send<AdminAddUserToGroupCommand>(addToGroupCommand);
+        const userService = new DefaultUserService()
+        await userService.createAndAssignManager(email)
 
         return {
             statusCode: 200,
             headers: headers,
             body: JSON.stringify({
-                message: `ユーザー ${userEmail} を作成し、招待メールを送信しました。`,
+                message: `ユーザー ${email} を作成し、招待メールを送信しました。`,
             }),
         };
     } catch (err) {
@@ -74,11 +31,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
 
         return {
             statusCode,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-                'Access-Control-Allow-Methods': 'POST,OPTIONS',
-            },
+            headers: headers,
             body: JSON.stringify({
                 message,
                 error: err instanceof Error ? err.message : 'Unknown error',
