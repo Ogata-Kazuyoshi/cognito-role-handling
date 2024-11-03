@@ -143,7 +143,7 @@ jobs:
         working-directory: serverless-app/lambda
       - name: SAM deploy
         run: |
-          sam deploy --stack-name oss-manager-sam-lambda \
+          sam deploy --stack-name ogata-cogniot-lambda \
           --s3-bucket ${{ vars.SAM_S3_BUCKET_NAME }} \
           --capabilities CAPABILITY_IAM \
           --no-confirm-changeset \

@@ -8,12 +8,16 @@ Description: >
 Parameters:
   UserPoolId:
     Type: String
+    Default: ""
   AwsAccessKeyId:
     Type: String
+    Default: ""
   AwsSecretAccessKey:
     Type: String
+    Default: ""
   AwsSessionToken:
     Type: String
+    Default: ""
   LambdaRoleName:
     Type: String
 
