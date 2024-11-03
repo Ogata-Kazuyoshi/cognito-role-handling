@@ -174,23 +174,23 @@ jobs:
       - name: Install Bun
         run: |
           curl -fsSL https://bun.sh/install | bash
-          echo "BUN_INSTALL=$HOME/.bun" >> $GITHUB_ENV
-          echo "PATH=$BUN_INSTALL/bin:$PATH" >> $GITHUB_ENV
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+          echo "$BUN_INSTALL/bin/bun version:" && $BUN_INSTALL/bin/bun --version
         shell: bash
 
       - name: Install dependencies
         run: |
-          cd serverless-app/cloudfront
-          source $GITHUB_ENV
-          bun i
+          cd cloudfront
+          $HOME/.bun/bin/bun i
 
       - name: Build cloudfront
         env:
           VITE_APIGATEWAY: ${{ vars.DEV_APIGATEWAY_URL }}
         run: |
           cd serverless-app/cloudfront
-          source $GITHUB_ENV
-          bun run build
+          source ~/.bashrc
+          $HOME/.bun/bin/bun run build
 
       - name: Deploy to S3
         run: |
