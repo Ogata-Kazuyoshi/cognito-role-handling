@@ -20,6 +20,15 @@ Parameters:
     Default: ""
   LambdaRoleName:
     Type: String
+  HostZoneId:
+    Type: String
+    Default: ""
+  RegionalCertificateArn:
+    Type: String
+    Default: ""
+  DomainName:
+    Type: String
+    Default: ""
 
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
@@ -149,3 +158,29 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - controller/userDelete.ts
+
+  CustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Ref DomainName
+      RegionalCertificateArn: !Ref RegionalCertificateArn
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref ApiGatewayApi
+      Stage: Dev
+
+  Route53RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId

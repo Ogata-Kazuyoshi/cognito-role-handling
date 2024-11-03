@@ -150,7 +150,10 @@ jobs:
           --no-fail-on-empty-changeset \
           --parameter-overrides \
           LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }} \
-          UserPoolId=${{ vars.COGNITO_USERPOOL_ID }}
+          UserPoolId=${{ vars.COGNITO_USERPOOL_ID }} \
+          HostZoneId=${{ vars.HOST_ZONE_ID }} \
+          RegionalCertificateArn=${{ vars.ACM_ARN_FOR_API }} \
+          DomainName=${{ vars.DOMAIN_NAME_FOR_API }} \
         working-directory: serverless-app/lambda
 
   build-and-deploy-cloudfront:
