@@ -143,12 +143,12 @@ jobs:
         working-directory: serverless-app/lambda
       - name: SAM deploy
         run: |
-          sam deploy --stack-name oss-manager-sam-lambda 
-          --s3-bucket ${{ vars.SAM_S3_BUCKET_NAME }} 
-          --capabilities CAPABILITY_IAM 
-          --no-confirm-changeset 
-          --no-fail-on-empty-changeset 
-          --parameter-overrides 
+          sam deploy --stack-name oss-manager-sam-lambda \
+          --s3-bucket ${{ vars.SAM_S3_BUCKET_NAME }} \
+          --capabilities CAPABILITY_IAM \
+          --no-confirm-changeset \
+          --no-fail-on-empty-changeset \
+          --parameter-overrides \
           LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }}
         working-directory: serverless-app/lambda
 
