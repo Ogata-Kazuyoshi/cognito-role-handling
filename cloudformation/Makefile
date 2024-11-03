@@ -15,6 +15,8 @@ iac-role-deploy:
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters ParameterKey=GithubAccount,ParameterValue=$(GITHUB_ACCOUNT) \
 	             ParameterKey=GithubRepository,ParameterValue=$(GITHUB_REPOSITORY) \
+	             ParameterKey=AssumeRoleName,ParameterValue=$(ASSUME_ROLE_NAME) \
+	             ParameterKey=LambdaRoleName,ParameterValue=$(LAMBDA_ROLE_NAME) \
 	--region ap-northeast-1
 
 iac-role-update:
@@ -23,6 +25,8 @@ iac-role-update:
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters ParameterKey=GithubAccount,ParameterValue=$(GITHUB_ACCOUNT) \
 	             ParameterKey=GithubRepository,ParameterValue=$(GITHUB_REPOSITORY) \
+	             ParameterKey=AssumeRoleName,ParameterValue=$(ASSUME_ROLE_NAME) \
+	             ParameterKey=LambdaRoleName,ParameterValue=$(LAMBDA_ROLE_NAME) \
 	--region ap-northeast-1
 
 iac-deploy:
@@ -90,6 +94,10 @@ iac-cloudfront-deploy:
 	--template-body file://serverless-app/cloudformation-cloudfront.yml \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters ParameterKey=WAFWebACLArn,ParameterValue=$(WAF_ACL_ARN) \
+	             ParameterKey=S3BucketForCloudFront,ParameterValue=$(S3_BUCKET_FOR_CLOUDFRONT) \
+	             ParameterKey=HostZoneId,ParameterValue=$(HOST_ZONE_ID) \
+	             ParameterKey=AcmArn,ParameterValue=$(ACM_ARN_FOR_CLOUDFRONT) \
+	             ParameterKey=DomainName,ParameterValue=$(DOMAIN_NAME_FOR_CLOUDFRONT) \
 	--region ap-northeast-1
 
 iac-cloudfront-update:
@@ -97,5 +105,9 @@ iac-cloudfront-update:
 	--template-body file://serverless-app/cloudformation-cloudfront.yml \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters ParameterKey=WAFWebACLArn,ParameterValue=$(WAF_ACL_ARN) \
-	--region ap-northeast-1
+                 ParameterKey=S3BucketForCloudFront,ParameterValue=$(S3_BUCKET_FOR_CLOUDFRONT) \
+                 ParameterKey=HostZoneId,ParameterValue=$(HOST_ZONE_ID) \
+                 ParameterKey=AcmArn,ParameterValue=$(ACM_ARN_FOR_CLOUDFRONT) \
+                 ParameterKey=DomainName,ParameterValue=$(DOMAIN_NAME_FOR_CLOUDFRONT) \
+    --region ap-northeast-1
 

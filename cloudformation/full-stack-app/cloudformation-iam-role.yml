@@ -6,12 +6,16 @@ Parameters:
     Type: String
   GithubRepository:
     Type: String
+  AssumeRoleName:
+    Type: String
+  LambdaRoleName:
+    Type: String
 
 Resources:
   GithubActionsRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ogata-githubactions
+      RoleName: !Ref AssumeRoleName
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -91,11 +95,11 @@ Resources:
                   - lambda:UpdateFunctionConfiguration
                   - lambda:GetFunction
                   - lambda:DeleteFunction
-                  - lambda:TagResource # この行を追加
-                  - lambda:UntagResource # この行も追加（将来的に必要になる可能性があります）
-                  - lambda:AddPermission # この行を追加
-                  - lambda:RemovePermission # この行も追加（将来的に必要になる可能性があります）
-                  - lambda:ListTags # この行を追加
+                  - lambda:TagResource
+                  - lambda:UntagResource
+                  - lambda:AddPermission
+                  - lambda:RemovePermission
+                  - lambda:ListTags
                 Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*'
               - Effect: Allow
                 Action:
@@ -112,7 +116,7 @@ Resources:
                   - apigateway:PUT
                   - apigateway:DELETE
                   - apigateway:PATCH
-                  - apigateway:UpdateRestApiPolicy # この行を追加
+                  - apigateway:UpdateRestApiPolicy
                 Resource:
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis'
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/*'
@@ -127,10 +131,10 @@ Resources:
                   - cloudfront:ListInvalidations
                 Resource: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/*'
 
-  LambdaExecutionRoleWithDynamoDB:
+  LambdaExecutionRoleWithCognito:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ogata-lambdaExecutionRole
+      RoleName: !Ref LambdaRoleName
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -141,18 +145,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: DynamoDBAccess
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:CreateTable
-                  - dynamodb:PutItem
-                  - dynamodb:GetItem
-                  - dynamodb:Scan
-                  - dynamodb:DeleteItem
-                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*'
         - PolicyName: CognitoUserPoolAccess
           PolicyDocument:
             Version: '2012-10-17'
@@ -161,6 +153,8 @@ Resources:
                 Action:
                   - cognito-idp:AdminCreateUser
                   - cognito-idp:AdminDeleteUser
+                  - cognito-idp:AdminAddUserToGroup
+                  - cognito-idp:ListUsersInGroup
                 Resource: !Sub 'arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*'
 
 Outputs:
@@ -169,8 +163,8 @@ Outputs:
     Value: !GetAtt GithubActionsRole.Arn
     Export:
       Name: GithubActionsRoleArn
-  LambdaExecutionRoleWithDynamoDBArn:
+  LambdaExecutionRoleWithCognitoArn:
     Description: ARN of the IAM Role for lambda role
-    Value: !GetAtt LambdaExecutionRoleWithDynamoDB.Arn
+    Value: "LambdaExecutionRoleWithCognito"
     Export:
-      Name: LambdaExecutionRoleWithDynamoDBArn
+      Name: LambdaExecutionRoleWithCognito

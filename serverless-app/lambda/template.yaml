@@ -14,6 +14,8 @@ Parameters:
     Type: String
   AwsSessionToken:
     Type: String
+  LambdaRoleName:
+    Type: String
 
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
@@ -65,7 +67,7 @@ Resources:
       Architectures:
         - x86_64
       Role:
-        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/ogata-lambdaExecutionRole'
+        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/${LambdaRoleName}'
       Events:
         userResister:
           Type: Api
@@ -96,7 +98,7 @@ Resources:
       Architectures:
         - x86_64
       Role:
-        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/ogata-lambdaExecutionRole'
+        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/${LambdaRoleName}'
       Events:
         usersFindAllByGroup:
           Type: Api
@@ -127,7 +129,7 @@ Resources:
       Architectures:
         - x86_64
       Role:
-        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/ogata-lambdaExecutionRole'
+        Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/${LambdaRoleName}'
       Events:
         userDelete:
           Type: Api
