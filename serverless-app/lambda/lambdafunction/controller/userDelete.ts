@@ -7,12 +7,12 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         const userName = event.queryStringParameters!!.userName!!
 
         const userService = new DefaultUserService()
-        await userService.deleteUserByUsername(userName)
+        await userService.deleteUserByUserName(userName)
 
         return {
             statusCode: 204,
             headers: headers,
-            body: JSON.stringify({message: `${userName} のuserを削除しました`}),
+            body: JSON.stringify({message: `${userName}のuserを削除しました`}),
         };
     } catch (err) {
         console.error('Error find users:', err);

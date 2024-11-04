@@ -1,44 +1,32 @@
-import {
-    AdminAddUserToGroupCommand,
-    AdminCreateUserCommand,
-    AdminDeleteUserCommand,
-    ListUsersInGroupCommand,
-    ListUsersInGroupCommandOutput
-} from "@aws-sdk/client-cognito-identity-provider";
-import {cognitoClient} from "../config/cognitoConfig";
+import {ListUsersInGroupCommandOutput} from "@aws-sdk/client-cognito-identity-provider";
+import {userPoolId} from "../config/cognitoConfig";
+import {CognitoCommand, CognitoRepository} from "./CognitoRepository";
+import {CognitoAttributeInterface} from "../model/CognitoAttributeInterface";
 
 export interface UserRepository {
-    createCognitoUser(command:  AdminCreateUserCommand): Promise<void>
-    assignGroup(command:  AdminAddUserToGroupCommand): Promise<void>
-    findUsersByGroup(command: ListUsersInGroupCommand): Promise<ListUsersInGroupCommandOutput>
-    deleteCognitoUser(command: AdminDeleteUserCommand): Promise<void>
+    createCognitoUser(userAttributes: CognitoAttributeInterface[]): Promise<void>
+    assignGroup(email: string, groupName: string): Promise<void>
+    findUsersByGroup(groupName: string): Promise<ListUsersInGroupCommandOutput>
+    deleteCognitoUser(userName: string): Promise<void>
 }
 
 export class DefaultUserRepository implements UserRepository {
-    async assignGroup(command:  AdminAddUserToGroupCommand): Promise<void> {
-        await cognitoClient.send(command);
+    constructor(private cognitoRepository: CognitoCommand = new CognitoRepository(userPoolId)) {}
+
+    async assignGroup(email: string, groupName: string): Promise<void> {
+        await this.cognitoRepository.assignGroup(email, groupName)
     }
 
-    async createCognitoUser(command: AdminCreateUserCommand): Promise<void> {
-        await cognitoClient.send(command);
+    async createCognitoUser(userAttributes: CognitoAttributeInterface[]): Promise<void> {
+        await this.cognitoRepository.createUserCommand(userAttributes)
     }
 
-    async findUsersByGroup(command: ListUsersInGroupCommand): Promise<ListUsersInGroupCommandOutput> {
-        try {
-            return  await cognitoClient.send(command);
-        } catch (error) {
-            console.error("Error listing users in group:", error);
-            throw error;
-        }
+    async findUsersByGroup(groupName: string): Promise<ListUsersInGroupCommandOutput> {
+        return await this.cognitoRepository.findUsersByGroupName(groupName)
     }
 
-    async deleteCognitoUser(command: AdminDeleteUserCommand): Promise<void> {
-        try {
-            await cognitoClient.send(command);
-        } catch (error) {
-            console.error("Error deleting Cognito user:", error);
-            throw error;
-        }
+    async deleteCognitoUser(userName: string): Promise<void> {
+        await this.cognitoRepository.deleteUserByUserName(userName)
     }
 
 }

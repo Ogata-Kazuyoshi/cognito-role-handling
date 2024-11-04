@@ -1,22 +1,12 @@
-import {
-    AdminAddUserToGroupCommand,
-    AdminAddUserToGroupCommandInput,
-    AdminCreateUserCommand,
-    AdminCreateUserCommandInput,
-    AdminDeleteUserCommand,
-    AdminDeleteUserCommandInput,
-    ListUsersInGroupCommand,
-    ListUsersInGroupCommandInput
-} from "@aws-sdk/client-cognito-identity-provider";
-import {userPoolId} from "../config/cognitoConfig";
 import {DefaultUserRepository, UserRepository} from "../repository/UserRepository";
 import {v4 as uuidv4} from 'uuid';
 import {ResponseUser} from "../model/ResponseUser";
+import {CognitoAttributeInterface} from "../model/CognitoAttributeInterface";
 
 export interface UserService {
     createAndAssignManager(email: string, allowDomain: string, companyUUID?: string): Promise<void>
     findUsersByGroupName(groupName: string): Promise<ResponseUser[]>
-    deleteUserByUsername(username: string): Promise<void>
+    deleteUserByUserName(userName: string): Promise<void>
 }
 
 export class DefaultUserService implements UserService {
@@ -29,13 +19,8 @@ export class DefaultUserService implements UserService {
     }
 
     async findUsersByGroupName(groupName: string): Promise<ResponseUser[]> {
-        const params: ListUsersInGroupCommandInput = {
-            UserPoolId: userPoolId,
-            GroupName: groupName,
-        };
-        const command = new ListUsersInGroupCommand(params);
         try {
-            const Users = (await this.userRepository.findUsersByGroup(command)).Users!!
+            const Users = (await this.userRepository.findUsersByGroup(groupName)).Users!!
             return Users.map(user => {
                 const userName = user.Username!!
                 const attributes = user.Attributes!!
@@ -55,44 +40,21 @@ export class DefaultUserService implements UserService {
         }
     }
 
-    async deleteUserByUsername(username: string): Promise<void> {
-        const params: AdminDeleteUserCommandInput = {
-            UserPoolId: userPoolId,
-            Username: username,
-        };
-        const command = new AdminDeleteUserCommand(params);
-        try {
-            await this.userRepository.deleteCognitoUser(command);
-        } catch (error) {
-            console.error("Error deleting user:", error);
-            throw Error();
-        }
+    async deleteUserByUserName(userName: string): Promise<void> {
+       await this.userRepository.deleteCognitoUser(userName)
     }
 
     private async createManager(email: string, allowDomain: string, companyUUID?: string) {
-        const params: AdminCreateUserCommandInput = {
-            UserPoolId: userPoolId,
-            Username: email,
-            UserAttributes: [
-                { Name: 'email', Value: email,},
-                { Name: 'email_verified', Value: 'true',},
-                { Name: 'custom:companyUUID', Value: companyUUID || uuidv4() },
-                { Name: 'custom:allowDomain', Value: allowDomain },
-            ],
-            DesiredDeliveryMediums: ['EMAIL'],
-            ForceAliasCreation: false,
-        }
-        const command = new AdminCreateUserCommand(params);
-        await this.userRepository.createCognitoUser(command)
+        const userAttributes: CognitoAttributeInterface[] = [
+            { Name: 'email', Value: email,},
+            { Name: 'email_verified', Value: 'true',},
+            { Name: 'custom:companyUUID', Value: companyUUID || uuidv4() },
+            { Name: 'custom:allowDomain', Value: allowDomain },
+        ]
+        await this.userRepository.createCognitoUser(userAttributes)
     }
 
     private async assignGroup(email: string) {
-        const addToGroupParams: AdminAddUserToGroupCommandInput = {
-            UserPoolId: userPoolId,
-            Username: email,
-            GroupName: 'MANAGER',
-        }
-        const addToGroupCommand = new AdminAddUserToGroupCommand(addToGroupParams)
-        await this.userRepository.assignGroup(addToGroupCommand)
+        await this.userRepository.assignGroup(email, 'MANAGER')
     }
 }

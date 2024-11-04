@@ -9,5 +9,5 @@ export const cognitoClient = process.env.AWS_SAM_LOCAL
           },
       })
     : new CognitoIdentityProviderClient({});
-export const userPoolId = process.env.UserPoolId;
+export const userPoolId = process.env.UserPoolId || '';
 
