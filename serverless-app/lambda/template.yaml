@@ -8,28 +8,27 @@ Description: >
 Parameters:
   UserPoolId:
     Type: String
-    Default: ""
+    Default: ''
   AwsAccessKeyId:
     Type: String
-    Default: ""
+    Default: ''
   AwsSecretAccessKey:
     Type: String
-    Default: ""
+    Default: ''
   AwsSessionToken:
     Type: String
-    Default: ""
+    Default: ''
   LambdaRoleName:
     Type: String
   HostZoneId:
     Type: String
-    Default: ""
+    Default: ''
   RegionalCertificateArn:
     Type: String
-    Default: ""
+    Default: ''
   DomainName:
     Type: String
-    Default: ""
-
+    Default: ''
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -159,6 +158,12 @@ Resources:
         EntryPoints:
           - controller/userDelete.ts
 
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      StageName: Dev
+
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
@@ -170,6 +175,9 @@ Resources:
 
   BasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
+    DependsOn:
+      - ApiGatewayApi
+      - ApiGatewayDeployment
     Properties:
       DomainName: !Ref CustomDomain
       RestApiId: !Ref ApiGatewayApi

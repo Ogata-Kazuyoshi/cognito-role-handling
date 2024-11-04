@@ -4,7 +4,20 @@ sam-local:
 
 sam-deploy:
 	sam build
-	sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+	if aws s3 ls "s3://ogata-sam-cli" 2>&1 | grep -q 'NoSuchBucket'; then \
+        echo "バケット ogata-sam-cli が存在しません。作成します。"; \
+        aws s3 mb s3://ogata-sam-cli --region ap-northeast-1; \
+    else \
+        echo "バケット ogata-sam-cli は既に存在します。クリーンナップします。"; \
+        aws s3 rm s3://ogata-sam-cli --recursive; \
+    fi
+	sam deploy --stack-name ogata-cogniot-lambda-cli --s3-bucket ogata-sam-cli --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset \
+	--parameter-overrides \
+	UserPoolId=$(COGNITO_USERPOOL_ID) \
+	LambdaRoleName=$(LAMBDA_ROLE_NAME) \
+	HostZoneId=$(HOST_ZONE_ID) \
+	RegionalCertificateArn=$(ACM_ARN_FOR_API) \
+	DomainName=$(DOMAIN_NAME_FOR_API) \
 
 sam-delete:
 	sam delete --stack-name temp-ogata-sam
