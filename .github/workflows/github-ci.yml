@@ -85,121 +85,123 @@
 ##         aws ecs wait services-stable --cluster $CLUSTER_NAME --services $SERVICE_NAME --region ${{ vars.AWS_REGION }}
 ##         echo "ECS service is stable."
 #
-name: Build and Deploy
 
-on:
-  push:
-    branches:
-      - main
-
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  deploy-to-lambda:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.OIDC_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Install SAM CLI
-        run: |
-          pip install aws-sam-cli
-
-      - name: Clean S3 bucket if exists
-        run: |
-          if aws s3 ls "s3://${{ vars.SAM_S3_BUCKET_NAME }}" 2>&1 | grep -q 'NoSuchBucket'
-          then
-            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} は存在しません。クリーンアップをスキップします。"
-          else
-            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} が存在します。クリーンアップを実行します。"
-            aws s3 rm s3://${{ vars.SAM_S3_BUCKET_NAME }} --recursive
-          fi
-
-      - name: Create S3 bucket if not exists
-        run: |
-          if ! aws s3 ls "s3://${{ vars.SAM_S3_BUCKET_NAME }}" 2>&1 | grep -q 'NoSuchBucket'
-          then
-            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} は既に存在します。"
-          else
-            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} が存在しません。作成します。"
-            aws s3 mb s3://${{ vars.SAM_S3_BUCKET_NAME }} --region ${{ vars.AWS_REGION }}
-          fi
-
-      - name: Install SAM CLI
-        run: |
-          pip install aws-sam-cli
-      - name: SAM build
-        run: sam build
-        working-directory: serverless-app/lambda
-      - name: SAM deploy
-        run: |
-          sam deploy --stack-name ogata-cogniot-lambda \
-          --s3-bucket ${{ vars.SAM_S3_BUCKET_NAME }} \
-          --capabilities CAPABILITY_IAM \
-          --no-confirm-changeset \
-          --no-fail-on-empty-changeset \
-          --parameter-overrides \
-          LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }} \
-          UserPoolId=${{ vars.COGNITO_USERPOOL_ID }} \
-          HostZoneId=${{ vars.HOST_ZONE_ID }} \
-          RegionalCertificateArn=${{ vars.ACM_ARN_FOR_API }} \
-          DomainName=${{ vars.DOMAIN_NAME_FOR_API }} \
-        working-directory: serverless-app/lambda
-
-  build-and-deploy-cloudfront:
-    needs:
-      - deploy-to-lambda
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.OIDC_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          echo "$BUN_INSTALL/bin/bun version:" && $BUN_INSTALL/bin/bun --version
-        shell: bash
-
-      - name: Install dependencies
-        run: |
-          cd serverless-app/cloudfront
-          $HOME/.bun/bin/bun i
-
-      - name: Build cloudfront
-        env:
-          VITE_APIGATEWAY: ${{ vars.DEV_APIGATEWAY_URL }}
-        run: |
-          cd serverless-app/cloudfront
-          source ~/.bashrc
-          $HOME/.bun/bin/bun run build
-
-      - name: Deploy to S3
-        run: |
-          aws s3 sync serverless-app/cloudfront/dist s3://${{ vars.CLOUD_FRONT_S3_BUCKET_NAME }} --delete
-
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUD_FRONT_DISTRIBUTION_ID }} --paths "/*"
+#
+#name: Build and Deploy
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#
+#permissions:
+#  id-token: write
+#  contents: read
+#
+#jobs:
+#  deploy-to-lambda:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Git clone the repository
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: ${{ vars.OIDC_ROLE_ARN }}
+#          aws-region: ${{ vars.AWS_REGION }}
+#
+#      - name: Install SAM CLI
+#        run: |
+#          pip install aws-sam-cli
+#
+#      - name: Clean S3 bucket if exists
+#        run: |
+#          if aws s3 ls "s3://${{ vars.SAM_S3_BUCKET_NAME }}" 2>&1 | grep -q 'NoSuchBucket'
+#          then
+#            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} は存在しません。クリーンアップをスキップします。"
+#          else
+#            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} が存在します。クリーンアップを実行します。"
+#            aws s3 rm s3://${{ vars.SAM_S3_BUCKET_NAME }} --recursive
+#          fi
+#
+#      - name: Create S3 bucket if not exists
+#        run: |
+#          if ! aws s3 ls "s3://${{ vars.SAM_S3_BUCKET_NAME }}" 2>&1 | grep -q 'NoSuchBucket'
+#          then
+#            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} は既に存在します。"
+#          else
+#            echo "バケット ${{ vars.SAM_S3_BUCKET_NAME }} が存在しません。作成します。"
+#            aws s3 mb s3://${{ vars.SAM_S3_BUCKET_NAME }} --region ${{ vars.AWS_REGION }}
+#          fi
+#
+#      - name: Install SAM CLI
+#        run: |
+#          pip install aws-sam-cli
+#      - name: SAM build
+#        run: sam build
+#        working-directory: serverless-app/lambda
+#      - name: SAM deploy
+#        run: |
+#          sam deploy --stack-name ogata-cogniot-lambda \
+#          --s3-bucket ${{ vars.SAM_S3_BUCKET_NAME }} \
+#          --capabilities CAPABILITY_IAM \
+#          --no-confirm-changeset \
+#          --no-fail-on-empty-changeset \
+#          --parameter-overrides \
+#          LambdaRoleName=${{ vars.LAMBDA_ROLE_NAME }} \
+#          UserPoolId=${{ vars.COGNITO_USERPOOL_ID }} \
+#          HostZoneId=${{ vars.HOST_ZONE_ID }} \
+#          RegionalCertificateArn=${{ vars.ACM_ARN_FOR_API }} \
+#          DomainName=${{ vars.DOMAIN_NAME_FOR_API }} \
+#        working-directory: serverless-app/lambda
+#
+#  build-and-deploy-cloudfront:
+#    needs:
+#      - deploy-to-lambda
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Git clone the repository
+#        uses: actions/checkout@v4
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: ${{ vars.OIDC_ROLE_ARN }}
+#          aws-region: ${{ vars.AWS_REGION }}
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: '18'
+#
+#      - name: Install Bun
+#        run: |
+#          curl -fsSL https://bun.sh/install | bash
+#          export BUN_INSTALL="$HOME/.bun"
+#          export PATH="$BUN_INSTALL/bin:$PATH"
+#          echo "$BUN_INSTALL/bin/bun version:" && $BUN_INSTALL/bin/bun --version
+#        shell: bash
+#
+#      - name: Install dependencies
+#        run: |
+#          cd serverless-app/cloudfront
+#          $HOME/.bun/bin/bun i
+#
+#      - name: Build cloudfront
+#        env:
+#          VITE_APIGATEWAY: ${{ vars.DEV_APIGATEWAY_URL }}
+#        run: |
+#          cd serverless-app/cloudfront
+#          source ~/.bashrc
+#          $HOME/.bun/bin/bun run build
+#
+#      - name: Deploy to S3
+#        run: |
+#          aws s3 sync serverless-app/cloudfront/dist s3://${{ vars.CLOUD_FRONT_S3_BUCKET_NAME }} --delete
+#
+#      - name: Invalidate CloudFront cache
+#        run: |
+#          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUD_FRONT_DISTRIBUTION_ID }} --paths "/*"
