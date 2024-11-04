@@ -163,12 +163,12 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayApi
 
-  ApiGatewayStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      StageName: Dev
-      DeploymentId: !Ref ApiGatewayDeployment
-      RestApiId: !Ref ApiGatewayApi
+  # ApiGatewayStage:
+  #   Type: AWS::ApiGateway::Stage
+  #   Properties:
+  #     StageName: Dev
+  #     DeploymentId: !Ref ApiGatewayDeployment
+  #     RestApiId: !Ref ApiGatewayApi
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
@@ -184,7 +184,7 @@ Resources:
     DependsOn:
       - ApiGatewayApi
       - ApiGatewayDeployment
-      - ApiGatewayStage
+      # - ApiGatewayStage
     Properties:
       DomainName: !Ref CustomDomain
       RestApiId: !Ref ApiGatewayApi
