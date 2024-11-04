@@ -158,11 +158,17 @@ Resources:
         EntryPoints:
           - controller/userDelete.ts
 
-#  ApiGatewayDeployment:
-#    Type: AWS::ApiGateway::Deployment
-#    Properties:
-#      RestApiId: !Ref ApiGatewayApi
-#      StageName: Dev
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: Dev
+      DeploymentId: !Ref ApiGatewayDeployment
+      RestApiId: !Ref ApiGatewayApi
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
@@ -177,7 +183,8 @@ Resources:
     Type: AWS::ApiGateway::BasePathMapping
     DependsOn:
       - ApiGatewayApi
-#      - ApiGatewayDeployment
+      - ApiGatewayDeployment
+      - ApiGatewayStage
     Properties:
       DomainName: !Ref CustomDomain
       RestApiId: !Ref ApiGatewayApi
