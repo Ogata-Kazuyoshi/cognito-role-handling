@@ -162,7 +162,7 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref ApiGatewayApi
-      StageName: Dev
+#      StageName: Dev
 
   CustomDomain:
     Type: AWS::ApiGateway::DomainName
