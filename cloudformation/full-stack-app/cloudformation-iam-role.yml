@@ -10,6 +10,8 @@ Parameters:
     Type: String
   LambdaRoleName:
     Type: String
+  HostZoneId:
+    Type: String
 
 Resources:
   GithubActionsRole:
@@ -119,10 +121,13 @@ Resources:
                   - apigateway:PATCH
                   - apigateway:UpdateRestApiPolicy
                   - apigateway:AddCertificateToDomain
+                  - apigateway:CreateDomainName
+                  - apigateway:GetDomainName
                 Resource:
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis'
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/*'
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/domainnames'
+                  - !Sub 'arn:aws:apigateway:${AWS::Region}::/domainnames/*'
         - PolicyName: CloudFrontInvalidationPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -133,6 +138,18 @@ Resources:
                   - cloudfront:GetInvalidation
                   - cloudfront:ListInvalidations
                 Resource: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/*'
+        - PolicyName: Route53ManagementPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - route53:ChangeResourceRecordSets
+                  - route53:ListHostedZones
+                  - route53:GetChange
+                Resource:
+                  - !Sub 'arn:aws:route53:::hostedzone/${HostZoneId}'
+                  - 'arn:aws:route53:::change/*'
 
   LambdaExecutionRoleWithCognito:
     Type: AWS::IAM::Role
@@ -168,6 +185,6 @@ Outputs:
       Name: GithubActionsRoleArn
   LambdaExecutionRoleWithCognitoArn:
     Description: ARN of the IAM Role for lambda role
-    Value: "LambdaExecutionRoleWithCognito"
+    Value: 'LambdaExecutionRoleWithCognito'
     Export:
       Name: LambdaExecutionRoleWithCognito

@@ -17,6 +17,7 @@ iac-role-deploy:
 	             ParameterKey=GithubRepository,ParameterValue=$(GITHUB_REPOSITORY) \
 	             ParameterKey=AssumeRoleName,ParameterValue=$(ASSUME_ROLE_NAME) \
 	             ParameterKey=LambdaRoleName,ParameterValue=$(LAMBDA_ROLE_NAME) \
+	             ParameterKey=HostZoneId,ParameterValue=$(HOST_ZONE_ID) \
 	--region ap-northeast-1
 
 iac-role-update:
@@ -27,6 +28,7 @@ iac-role-update:
 	             ParameterKey=GithubRepository,ParameterValue=$(GITHUB_REPOSITORY) \
 	             ParameterKey=AssumeRoleName,ParameterValue=$(ASSUME_ROLE_NAME) \
 	             ParameterKey=LambdaRoleName,ParameterValue=$(LAMBDA_ROLE_NAME) \
+	             ParameterKey=HostZoneId,ParameterValue=$(HOST_ZONE_ID) \
 	--region ap-northeast-1
 
 iac-deploy:

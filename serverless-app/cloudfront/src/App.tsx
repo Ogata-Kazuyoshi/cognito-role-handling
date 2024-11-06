@@ -38,6 +38,7 @@ export const App = (
 
   return (
       <>
+          <div style={{fontSize: "30px"}}>やったぜー。これはできてる！！</div>
           <div>ユーザーEメール入力用</div>
           <div>
               <label>user email : </label>
