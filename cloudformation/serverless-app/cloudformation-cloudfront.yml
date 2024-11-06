@@ -19,6 +19,9 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref S3BucketForCloudFront
+      Tags:
+        - Key: Project
+          Value: MyProjectTemp
 
   CloudFrontOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
@@ -79,6 +82,9 @@ Resources:
             Cookies:
               Forward: none
         WebACLId: !Ref WAFWebACLArn
+      Tags:
+        - Key: Project
+          Value: MyProjectTemp
 
   Route53Record:
     Type: AWS::Route53::RecordSet
