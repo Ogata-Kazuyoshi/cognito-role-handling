@@ -123,6 +123,8 @@ Resources:
                   - apigateway:AddCertificateToDomain
                   - apigateway:CreateDomainName
                   - apigateway:GetDomainName
+                  - apigateway:TagResource
+                  - apigateway:UntagResource
                 Resource:
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis'
                   - !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/*'

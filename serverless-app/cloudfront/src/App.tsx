@@ -2,10 +2,13 @@ import {useState} from 'react'
 import './App.css'
 import {DefaultUserService, UserService} from "./service/UserService.ts";
 import {RequestCreateUser} from "./model/RequestCreateUser.ts";
+import axios from "axios";
+import {RequestSESSend} from "./model/RequestSESSend.ts";
 
 interface Props {
     userService?: UserService
 }
+
 export const App = (
     {
         userService = new DefaultUserService()
@@ -15,6 +18,7 @@ export const App = (
     const [email, setEmail] = useState('')
     const [allowDomain, setAllowDomain] = useState('')
     const [userName, setUserName] = useState('')
+    const [sesMailUser, setSesMailUser] = useState('')
 
     const handleClick = async () => {
         const reqBody: RequestCreateUser = {
@@ -33,6 +37,15 @@ export const App = (
 
     const handleDeleteUser = async () => {
         const res = await userService?.deleteUserByUserName(userName)
+        console.log({res})
+    }
+
+    const handleSendSES = async () => {
+        const body: RequestSESSend = {
+            email: sesMailUser
+        }
+        const apiGateway: string = import.meta.env.VITE_APIGATEWAY
+        const res = await axios.post(`${apiGateway}/api/ses`, body)
         console.log({res})
     }
 
@@ -66,6 +79,17 @@ export const App = (
           </div>
           <div>
               <button onClick={handleDeleteUser}>ユーザーを削除</button>
+          </div>
+          <br/>
+          <br/>
+          <div>
+              <label>SESでのメール送信 : </label>
+              <input value={sesMailUser} onChange={(e) => {
+                  setSesMailUser(e.target.value)
+              }} type="text"/>
+          </div>
+          <div>
+              <button onClick={handleSendSES}>メールを送信</button>
           </div>
       </>
   )
