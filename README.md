@@ -100,6 +100,16 @@
 
 </details>
 
+<details>
+<summary> 5. サンドボックス vs 本番環境モード</summary>
+
+- 各モードの特徴を記す
+- 特に、サンドボックスモードは、受信者のメールアドレスも検証済みであることが求められる
+
+![](assets/images/ses-6.png)
+
+</details>
+
 
 # 備考
 
