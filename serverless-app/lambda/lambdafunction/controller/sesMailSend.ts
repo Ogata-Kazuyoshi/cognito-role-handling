@@ -1,9 +1,8 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {headers} from '../config/responseHeaderConfig';
-import {DefaultUserService} from "../servise/UserService";
-import {RequestCreateUser} from "../model/RequestCreateUser";
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import {SendEmailCommand, SESClient} from "@aws-sdk/client-ses";
 import {v4 as uuidv4} from 'uuid'
+import {RequestSES} from "../model/RequestSES";
 
 
 const sesClient = process.env.AWS_SAM_LOCAL
@@ -19,8 +18,9 @@ const sesClient = process.env.AWS_SAM_LOCAL
     })
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const {email}: RequestCreateUser = JSON.parse(event.body || '{}');
-        console.log({email})
+        const {senderEmail, receiverEmail}: RequestSES = JSON.parse(event.body || '{}');
+        console.log({senderEmail})
+        console.log({receiverEmail})
         const uuid = uuidv4()
         console.log({uuid})
 
@@ -30,7 +30,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         // SESを使用してメールを送信
         const params = {
             Destination: {
-                ToAddresses: [email],
+                ToAddresses: [receiverEmail],
             },
             Message: {
                 Body: {
@@ -38,21 +38,15 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                 },
                 Subject: { Data: "テストメール" },
             },
-            Source: "gatagataogata@gmail.com", // 送信元のメールアドレスを指定してください
+            Source: senderEmail
         };
 
-        try {
-            const data = await sesClient.send(new SendEmailCommand(params));
-            console.log("メールが送信されました:", data);
-        } catch (error) {
-            console.error("メールの送信に失敗しました:", error);
-        }
-
+        const data = await sesClient.send(new SendEmailCommand(params));
 
         return {
             statusCode: 201,
             headers: headers,
-            body: JSON.stringify({message: `SESに送信しました`}),
+            body: JSON.stringify({message: `SESに送信しました: ${data}`}),
         };
     } catch (err) {
         console.error('Error find users:', err);
