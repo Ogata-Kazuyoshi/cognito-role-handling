@@ -89,6 +89,17 @@
 
 </details>
 
+<details>
+<summary> 4. ドメインを指定した場合</summary>
+
+- ドメインの指定の場合は、下記の添付を選択して作成
+- TXTレコードをRoute53で追加したら検証完了
+
+![](assets/images/ses-4.png)
+![](assets/images/ses-5.png)
+
+</details>
+
 
 # 備考
 
