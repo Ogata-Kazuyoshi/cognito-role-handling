@@ -178,6 +178,15 @@ Resources:
                   - cognito-idp:AdminAddUserToGroup
                   - cognito-idp:ListUsersInGroup
                 Resource: !Sub 'arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*'
+        - PolicyName: SESEmailSendPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: '*'
 
 Outputs:
   GithubActionsRoleArn:

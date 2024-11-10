@@ -2,12 +2,21 @@ import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {headers} from '../config/responseHeaderConfig';
 import {DefaultUserService} from "../servise/UserService";
 import {RequestCreateUser} from "../model/RequestCreateUser";
-import * as AWS from 'aws-sdk';
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const ses = new AWS.SES({ region: 'ap-northeast-1' });
+
+const sesClient = new SESClient({
+    region: 'ap-northeast-1',
+    // credentials: {
+    //     accessKeyId: process.env.AwsAccessKeyId || '',
+    //     secretAccessKey: process.env.AwsSecretAccessKey || '',
+    //     sessionToken: process.env.AwsSessionToken || '',
+    // },
+});
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const {email}: RequestCreateUser = JSON.parse(event.body || '{}');
+        console.log({email})
 
         // SESを使用してメールを送信
         const params = {
@@ -20,10 +29,15 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                 },
                 Subject: { Data: "テストメール" },
             },
-            Source: "your-email@example.com", // 送信元のメールアドレスを指定してください
+            Source: "gatagataogata@gmail.com", // 送信元のメールアドレスを指定してください
         };
 
-        await ses.sendEmail(params).promise();
+        try {
+            const data = await sesClient.send(new SendEmailCommand(params));
+            console.log("メールが送信されました:", data);
+        } catch (error) {
+            console.error("メールの送信に失敗しました:", error);
+        }
 
 
         return {
