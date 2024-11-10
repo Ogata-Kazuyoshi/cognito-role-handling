@@ -3,20 +3,29 @@ import {headers} from '../config/responseHeaderConfig';
 import {DefaultUserService} from "../servise/UserService";
 import {RequestCreateUser} from "../model/RequestCreateUser";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import {v4 as uuidv4} from 'uuid'
 
 
-const sesClient = new SESClient({
+const sesClient = process.env.AWS_SAM_LOCAL
+    ? new SESClient({
     region: 'ap-northeast-1',
-    // credentials: {
-    //     accessKeyId: process.env.AwsAccessKeyId || '',
-    //     secretAccessKey: process.env.AwsSecretAccessKey || '',
-    //     sessionToken: process.env.AwsSessionToken || '',
-    // },
-});
+    credentials: {
+        accessKeyId: process.env.AwsAccessKeyId || '',
+        secretAccessKey: process.env.AwsSecretAccessKey || '',
+        sessionToken: process.env.AwsSessionToken || '',
+    },
+}): new SESClient({
+        region: 'ap-northeast-1'
+    })
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const {email}: RequestCreateUser = JSON.parse(event.body || '{}');
         console.log({email})
+        const uuid = uuidv4()
+        console.log({uuid})
+
+        const url = `https://hogehoge.toro.toyota/agreement?id=${uuid}`
+
 
         // SESを使用してメールを送信
         const params = {
@@ -25,7 +34,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             },
             Message: {
                 Body: {
-                    Text: { Data: "こんにちは、これはテストメールです。" },
+                    Text: { Data: `こんにちは、これはテストメールです。下記のurlへアクセスしてくださん ¥n ${url} ¥n よろしくお願いします` },
                 },
                 Subject: { Data: "テストメール" },
             },
