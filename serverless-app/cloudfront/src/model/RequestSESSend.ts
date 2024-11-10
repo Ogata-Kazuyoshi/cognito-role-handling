@@ -1,3 +1,4 @@
 export interface RequestSESSend {
-    email: string
+    senderEmail: string
+    receiverEmail: string
 }

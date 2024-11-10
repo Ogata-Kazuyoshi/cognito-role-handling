@@ -2,23 +2,26 @@ import {useState} from 'react'
 import './App.css'
 import {DefaultUserService, UserService} from "./service/UserService.ts";
 import {RequestCreateUser} from "./model/RequestCreateUser.ts";
-import axios from "axios";
 import {RequestSESSend} from "./model/RequestSESSend.ts";
+import {DefaultSESService, SESService} from "./service/SESService.ts";
 
 interface Props {
     userService?: UserService
+    sesService?: SESService
 }
 
 export const App = (
     {
-        userService = new DefaultUserService()
+        userService = new DefaultUserService(),
+        sesService = new DefaultSESService()
     }: Props
 ) => {
 
     const [email, setEmail] = useState('')
     const [allowDomain, setAllowDomain] = useState('')
     const [userName, setUserName] = useState('')
-    const [sesMailUser, setSesMailUser] = useState('')
+    const [sesSenderMail, setSesSenderMail] = useState('')
+    const [sesReceiverMail, setSesReceiverMail] = useState('')
 
     const handleClick = async () => {
         const reqBody: RequestCreateUser = {
@@ -36,16 +39,16 @@ export const App = (
     }
 
     const handleDeleteUser = async () => {
-        const res = await userService?.deleteUserByUserName(userName)
+        const res = await userService.deleteUserByUserName(userName)
         console.log({res})
     }
 
     const handleSendSES = async () => {
         const body: RequestSESSend = {
-            email: sesMailUser
+            senderEmail: sesSenderMail,
+            receiverEmail: sesReceiverMail
         }
-        const apiGateway: string = import.meta.env.VITE_APIGATEWAY
-        const res = await axios.post(`${apiGateway}/api/ses`, body)
+        const res = await sesService.sendEmail(body)
         console.log({res})
     }
 
@@ -82,14 +85,28 @@ export const App = (
           </div>
           <br/>
           <br/>
-          <div>
-              <label>SESでのメール送信 : </label>
-              <input value={sesMailUser} onChange={(e) => {
-                  setSesMailUser(e.target.value)
-              }} type="text"/>
-          </div>
-          <div>
-              <button onClick={handleSendSES}>メールを送信</button>
+          <div style={{
+              border: "1px solid black",
+              borderRadius: "10px",
+              backgroundColor: "bisque",
+              padding: "10px"
+          }}>
+              <div>SESの確認</div>
+              <div>
+                  <label>送信者のアドレス : </label>
+                  <input value={sesSenderMail} onChange={(e) => {
+                      setSesSenderMail(e.target.value)
+                  }} type="text"/>
+              </div>
+              <div>
+                  <label>受信者のアドレス : </label>
+                  <input value={sesReceiverMail} onChange={(e) => {
+                      setSesReceiverMail(e.target.value)
+                  }} type="text"/>
+              </div>
+              <div>
+                  <button onClick={handleSendSES}>メールを送信</button>
+              </div>
           </div>
       </>
   )
